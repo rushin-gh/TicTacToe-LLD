@@ -4,12 +4,12 @@ public class GameManager
 {
     private GameBoard _board;
 
-    public Player[] players;
+    private Player[] _players;
 
-    public void InitialiseGame(int dimension, string p1, string p2)
+    public GameManager(int dimension, string p1, string p2)
     {
         _board = new GameBoard(dimension);
-        players = new Player[2]
+        _players = new Player[2]
         {
             new Player(p1, Symbol.X),
             new Player(p2, Symbol.O)
@@ -20,40 +20,42 @@ public class GameManager
     {
         for (int i = 0; i < _board.Dimension * _board.Dimension; i++)
         {
-            Player p = players[i % 2];
+            Player p = _players[i % 2];
             do
             {
-                int row = Convert.ToInt32(Console.ReadLine());
-                int col = Convert.ToInt32(Console.ReadLine());
-                if (_board.TryPlace(p, row, col))
+                var rowInput = Console.ReadLine();
+                var colInput = Console.ReadLine();
+
+                if (int.TryParse(rowInput, out int row) && int.TryParse(colInput, out int col))
                 {
-                    if (_board.WinCheck(p, row, col))
+                    row--;
+                    col--;
+                    if (_board.IsValidMove(row, col) && _board.TryPlace(p, row, col) && _board.WinCheck(row, col))
                     {
-                        DisplayResult(p);
+                        DisplayResult(GameResult.Win, p);
                         return;
                     }
-                    else if (_board.DrawCheck())
-                    {
-                        DisplayResult(new Player("", Symbol._));
-                        return;
-                    }
-                    break;
                 }
             } while (true);
-            
-            
         }
+        DisplayResult(GameResult.Draw);
     }
 
-    public void DisplayResult(Player p)
+    public void DisplayResult(GameResult result, Player p = null)
     {
-        if (p.PlayerSymbol == Symbol._)
+        if (result == GameResult.Draw)
         {
-            // Print draw
+            Console.WriteLine("Game drawn");
         }
         else
         {
-            // print p.Name
+            if (p == null)
+            {
+                throw new Exception("For win result player cant be null");
+            }
+
+            Console.WriteLine($"Winner : {p.Name}");
         }
+        
     }
 }

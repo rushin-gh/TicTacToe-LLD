@@ -2,47 +2,62 @@ namespace TicTacToe;
 
 public class GameBoard
 {
-    public Symbol[,] Board { get; }
+    public Symbol[,] Board { get; private set; }
 
-    public int Dimension { get; set; }
+    public int Dimension { get; }
 
+    private int _diagonal { get; set; }
+    private int _crossDiagonal { get; set; }
+    
+    private int[] _rowCheck { get; set; }
+    private int[] colCheck { get; set; }
+    
+    
     public GameBoard(int dimension)
     {
         Dimension = dimension;
         Board = new Symbol[Dimension, Dimension];
 
-        for (int i = 0; i < Dimension; i++)
-        {
-            for (int j = 0; j < Dimension; j++)
+        _diagonal = 0;
+        _crossDiagonal = 0;
+        _rowCheck = new int[Dimension];
+        colCheck = new int[Dimension];
+    }
+
+    public bool IsValidMove(int row, int col)
+    {
+        return (row >= 0 && row < Dimension && col >= 0 && col < Dimension && Board[row, col] == Symbol.Empty);
+    }
+
+    public bool TryPlace(Player player, int row, int col)
+    {
+
+            Board[row, col] = player.PlayerSymbol;
+            _rowCheck[row]++;
+            colCheck[col]++;
+
+            var v = (player.PlayerSymbol == Symbol.X ? 1 : -1);
+            if (row == col)
             {
-                Board[i, j] = Symbol._;
+                _diagonal += v;
             }
-        }
+
+            if (row + col == Dimension)
+            {
+                _crossDiagonal += v;
+            }
+            return true;
+        
     }
 
-    public bool TryPlace(Player P, int row, int col)
+    public bool WinCheck(int row, int col)
     {
-        if (Board[row, col] != Symbol._)
-        {
-            return false;
-        }
-
-        Board[row, col] = P.PlayerSymbol;
-        return true;
-    }
-
-    public bool WinCheck(Player P, int row, int col)
-    {
-        // Check row, col, diagonal and cross diagonal based on that send result;
-        // Sending true temporarily
-        return true;
-    }
-
-    public bool DrawCheck()
-    {
-        // Check if there is no such move that will result to win of one player
-        // Sending true temporaily
-        return true;
+        return (
+            Math.Abs(_diagonal) == Dimension ||
+            Math.Abs(_crossDiagonal) == Dimension ||
+            Math.Abs(_rowCheck[row]) == Dimension ||
+            Math.Abs(colCheck[col]) == Dimension
+        );
     }
 
     public void PrintBoard()
